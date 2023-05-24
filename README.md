@@ -83,6 +83,8 @@ void main()
 <HERE>
 
 ## Grammar
+  
+The following grammar is accepted and compiled by sectorc:
 
 ```
 program     = (var_decl | func_decl)+

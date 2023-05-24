@@ -1,5 +1,5 @@
-# sectorc
-sectorc is a C compiler written in x86-16 assembly that fits within the 512 byte boot sector of an x86 machine. It also supports a
+# SectorC
+SectorC is a C compiler written in x86-16 assembly that fits within the 512 byte boot sector of an x86 machine. It also supports a
 surprisingly large subset of C, capable enough to write real and interesting programs. It is quite likely the smallest C compiler ever written.
 
 In a base64 encoding, it looks like this:

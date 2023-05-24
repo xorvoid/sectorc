@@ -139,7 +139,7 @@ In addition, both `// comment` and `/* multi-line comment */` styles are support
 
 ## How?
 
-See blog post: [SectorC: A C Compiler in 512 bytes](http://localhost:8080/sectorc.html)
+See blog post: [SectorC: A C Compiler in 512 bytes](https://xorvoid.com/sectorc.html)
 
 ## Why?
 

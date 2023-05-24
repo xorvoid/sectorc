@@ -10,6 +10,7 @@ For example: the following program animates a moving sine-wave:
 ```
 int y;
 int x;
+int x_0;
 void sin_positive_approx()
 {
   y = ( x_0 * ( 157 - x_0 ) ) >> 7;
@@ -33,6 +34,7 @@ void sin()
 
 
 int offset;
+int x_end;
 void draw_sine_wave()
 {
   x = offset;
@@ -46,6 +48,8 @@ void draw_sine_wave()
   }
 }
 
+int v_1;
+int v_2;
 void delay()
 {
   v_1 = 0;
@@ -81,6 +85,13 @@ void main()
 ![Moving Sinwave](img/sinwave.png)
 
 <HERE>
+
+## Provided Example Code
+
+A few examples are provided that leverage the unique hardware aspects of the x86-16 IBM PC:
+- `examples/hello.c:` Print a text greeting on the screen writing to memory at 0xB8000
+- `examples/sinwave.c:` Draw a moving sine wave animation with VGA Mode 0x13 using an appropriately bad approximation of sin(x)
+- `examples/twinkle.c:` Play “Twinkle Twinkle Little Star” through the PC Speaker (Warning: LOUD)
 
 ## Grammar
   
@@ -135,12 +146,6 @@ Build: `./build.sh`
 Run: `./run.sh your_source.c`
 
 NOTE: Tested only on a MacBook M1
-  
-## Runtime
-
-A small runtime library is included under `rt/` written in C and compiled with programs. The entry point from the compiler is `_start`.
-The default `rt/_start.c` calls your `main()` function and then will shutdown the machine via x86 APM (see `rt/lib.c`). These are good
-examples of the inline assembly (*ahem* machine-code) extensions.
 
 ## What is this useful for?
 

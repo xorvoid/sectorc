@@ -76,7 +76,9 @@ void main()
 }
 ```
 
-Screenshot:
+### Screenshot
+
+![Moving Sinwave](img/sinwave.png)
 
 <HERE>
 

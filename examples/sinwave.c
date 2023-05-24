@@ -1,6 +1,7 @@
 
 int y;
 int x;
+int x_0;
 void sin_positive_approx()
 {
   y = ( x_0 * ( 157 - x_0 ) ) >> 7;
@@ -24,6 +25,7 @@ void sin()
 
 
 int offset;
+int x_end;
 void draw_sine_wave()
 {
   x = offset;
@@ -37,6 +39,8 @@ void draw_sine_wave()
   }
 }
 
+int v_1;
+int v_2;
 void delay()
 {
   v_1 = 0;

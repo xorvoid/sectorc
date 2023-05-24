@@ -3,7 +3,7 @@ sectorc is a C Compiler that fits in the 512 byte boot sector of an x86 machine
 
 ## Supported language
 
-A fairly large subset is supported: global variables, functions, if statements, while statements, lots of operators, pointer dereference, etc
+A fairly large subset is supported: global variables, functions, if statements, while statements, lots of operators, pointer dereference, inline machine-code, comments, etc
 
 For example: the following program animates a moving sine-wave:
 

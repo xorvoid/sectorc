@@ -47,7 +47,7 @@
 ;;; bp: saved token for assigned variable
 ;;; sp: stack pointer, we don't mess with this
 ;;; si: used with lodsw for table scans
-;;; ds: fn symbol table segment (occassionally set to "cs" to access binary_oper_tbl)
+;;; ds: fn symbol table segment (occasionally set to "cs" to access binary_oper_tbl)
 ;;; di: codegen destination offset
 ;;; es: codegen destination segment
 ;;; cs: always 0x07c0

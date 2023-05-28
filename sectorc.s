@@ -335,7 +335,7 @@ _nextch:
   mov cl,al                     ; shift this char into cx
 
   imul bx,10
-  sub ax,48
+  sub al,48
   add bx,ax                     ; atoi computation: bx = 10 * bx + (ax - '0')
 
   call getch

@@ -212,7 +212,7 @@ compile_store:
   jmp emit_var                  ; [tail-call]
 
 save_var_and_compile_expr:
-  xchg bp,ax                     ; save dest to bp
+  xchg bp,ax                    ; save dest to bp
   call tok_next                 ; consume dest
   ;; [fall-through]             ; fall-through will consume "=" before compiling expr
 
@@ -227,17 +227,16 @@ compile_expr:
   push ds
   push cs                       ; cannot use cs override!
   pop ds                        ; because ';' here must be retained separately
-  mov si,binary_oper_tbl - 2    ; load ptr to operator table (biased backwards)
+  mov si,binary_oper_tbl        ; load ptr to operator table (biased backwards)
 _check_next:
-  lodsw                         ; discard 16-bit of machine-code
   lodsw                         ; load 16-bit token value
   test ax,ax                    ; end of table?
   je _not_found
   cmp ax,bx                     ; matches token?
+  lodsw                         ; load 16-bit of machine-code
   jne _check_next
 
 _found:
-  lodsw                         ; load 16-bit of machine-code
   push ax                       ; save it to the stack
   mov al,0x50                   ; code for "push ax"
   stosb                         ; emit

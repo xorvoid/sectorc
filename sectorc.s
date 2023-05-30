@@ -62,6 +62,12 @@ entry:
   xor di,di                     ; codegen index, zero'd
   ;; [fall-through]
 
+  db 0x81                       ; mask following call
+  ;; [fall-through]
+_is_int:
+  call tok_next2                ; consume "int" and <ident>
+  ;; [fall-through]
+
   ;; main loop for parsing all decls
 compile:
   ;; advance to either "int" or "void"
@@ -69,9 +75,7 @@ compile:
 
   ;; if "int" then skip a variable
   cmp ax,TOK_INT
-  jne compile_function
-  call tok_next2                ; consume "int" and <ident>
-  jmp compile
+  je _is_int
 
 compile_function:               ; parse and compile a function decl
   call tok_next                 ; consume "void"

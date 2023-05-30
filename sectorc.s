@@ -103,6 +103,7 @@ execute:
 ;;; compile statements (optionally advancing tokens beforehand)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 _is_call:
+  xchg bx,ax
   mov al,0xe8                   ; emit "call" instruction
   stosb
 

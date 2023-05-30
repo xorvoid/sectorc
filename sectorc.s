@@ -295,14 +295,15 @@ _not_paren:
 
 _not_addr:
   test dl,dl                    ; check for tok_is_num
+  mov ax,0x068b                 ; code for "mov ax,[imm]"
   je _not_int
   mov al,0xb8                   ; code for "mov ax,imm"
   stosb                         ; emit
-  jmp emit_tok                  ; [tail-call] to emit imm
-
+  db 0xf6                       ; mask following stosw and add bx,bx
+                                ; [tail-call] to emit imm
+  ;; [fall-through]
 _not_int:
   ;; compile var
-  mov ax,0x068b                 ; code for "mov ax,[imm]"
   ;; [fall-through]
 
 emit_var:

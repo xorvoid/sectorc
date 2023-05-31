@@ -141,9 +141,7 @@ _not_call:
 
 _not_asm:
   cmp ax,TOK_IF_BEGIN           ; check for "if"
-  jne _not_if
-  call _control_flow_block      ; compile control-flow block
-  jmp _patch_fwd                ; patch up forward jump of if-stmt
+  je _is_if
 
 _not_if:
   cmp ax,TOK_WHILE_BEGIN        ; check for "while"
@@ -161,6 +159,11 @@ _patch_back:
   dec ax
   stosw                         ; emit target
   ;; [fall-through]
+  db 0x81                       ; mask following call
+_is_if:
+  call _control_flow_block      ; compile control-flow block
+  ;; [fall-through]             ; patch up forward jump of if-stmt
+
 _patch_fwd:
   mov ax,di                     ; compute relative fwd jump to this location: "dest - src"
   sub ax,si

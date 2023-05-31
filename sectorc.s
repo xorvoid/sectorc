@@ -420,6 +420,7 @@ binary_oper_tbl:
   dw TOK_GT,0xc09f              ; setg al
   dw TOK_LE,0xc09e              ; setle al
   dw TOK_GE,0xc09d              ; setge al
+binary_oper_tbl_e:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; boot signature

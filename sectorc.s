@@ -341,9 +341,6 @@ tok_next:
   setle dl                      ; tok_is_num = (al <= '9')
 
 _nextch:
-  cmp al,32
-  jle _done                     ; if char is space then break
-
   mov ch,cl
   mov cl,al                     ; shift this char into cx
 
@@ -352,7 +349,8 @@ _nextch:
   add bx,ax                     ; atoi computation: bx = 10 * bx + (ax - '0')
 
   call getch
-  jmp _nextch                   ; [loop]
+  cmp al,32
+  jg _nextch                    ; loop if char is not space
 
 _done:
   xchg cx,ax

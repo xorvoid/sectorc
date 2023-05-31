@@ -195,8 +195,6 @@ compile_assign:
   ;; [fall-through]
 
 compile_store_deref:
-  mov bx,bp                     ; restore dest var token
-  mov ax,0x0489                 ; code for "mov [si],ax"
   ;; [fall-through]
 
 emit_common_ptr_op:
@@ -212,8 +210,7 @@ _not_deref_store:
   ;; [fall-through]
 
 compile_store:
-  mov bx,bp                     ; restore dest var token
-  mov ax,0x0689                 ; code for "mov [imm],ax"
+  mov ah,0x06                   ; code for "mov [imm],ax"
   jmp emit_var                  ; [tail-call]
 
 save_var_and_compile_expr:
@@ -232,14 +229,14 @@ compile_expr:
   push ds
   push cs                       ; cannot use cs override!
   pop ds                        ; because ';' here must be retained separately
+  mov cx,(binary_oper_tbl_e-binary_oper_tbl)/4
   mov si,binary_oper_tbl        ; load ptr to operator table (biased backwards)
 _check_next:
   lodsw                         ; load 16-bit token value
-  test ax,ax                    ; end of table?
-  je _not_found
   cmp ax,bx                     ; matches token?
   lodsw                         ; load 16-bit of machine-code
-  jne _check_next
+  loopne _check_next            ; lodsw does not affect flags
+  jne _not_found
 
 _found:
   push ax                       ; save it to the stack
@@ -268,6 +265,8 @@ emit_op:
 
 _not_found:
   pop ds
+  mov bx,bp                     ; restore dest var token
+  mov ax,0x0489                 ; code for "mov [si],ax"
   ret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -297,7 +296,7 @@ _not_paren:
 _not_addr:
   test dl,dl                    ; check for tok_is_num
   mov ax,0x068b                 ; code for "mov ax,[imm]"
-  je _not_int
+  je _not_int                   ; mov does not affect flags
   mov al,0xb8                   ; code for "mov ax,imm"
   stosb                         ; emit
   db 0xf6                       ; mask following stosw and add bx,bx
@@ -421,7 +420,6 @@ binary_oper_tbl:
   dw TOK_GT,0xc09f              ; setg al
   dw TOK_LE,0xc09e              ; setle al
   dw TOK_GE,0xc09d              ; setge al
-  dw 0                          ; [sentinel]
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; boot signature

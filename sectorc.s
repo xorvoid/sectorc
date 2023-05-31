@@ -232,7 +232,7 @@ compile_expr:
   push ds
   push cs                       ; cannot use cs override!
   pop ds                        ; because ';' here must be retained separately
-  mov cx,(binary_oper_tbl_e-binary_oper_tbl)/4
+  mov cl,(binary_oper_tbl_e-binary_oper_tbl)/4
   mov si,binary_oper_tbl        ; load ptr to operator table (biased backwards)
 _check_next:
   lodsw                         ; load 16-bit token value

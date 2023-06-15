@@ -8,4 +8,4 @@ if [ "$#" -lt 1 ]; then
     exit 1
 fi
 
-cat $@ | qemu-system-i386 -hda build/sectorc.bin -serial stdio -audiodev coreaudio,id=audio0 -machine pcspk-audiodev=audio0
+cat $@ | qemu-system-i386 -drive file=build/sectorc.bin,format=raw -serial stdio -audiodev coreaudio,id=audio0 -machine pcspk-audiodev=audio0

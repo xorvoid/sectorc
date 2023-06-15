@@ -24,6 +24,7 @@
 %define TOK_SUB         65533
 %define TOK_ADD         65531
 %define TOK_MUL         65530
+%define TOK_DIV         65535
 %define TOK_AND         65526
 %define TOK_OR          76
 %define TOK_XOR         46
@@ -403,6 +404,7 @@ binary_oper_tbl:
   dw TOK_ADD,0xc103             ; add ax,cx
   dw TOK_SUB,0xc12b             ; sub ax,cx
   dw TOK_MUL,0xe1f7             ; mul ax,cx
+  dw TOK_DIV,0xf1f7             ; div ax,cx
   dw TOK_AND,0xc123             ; and ax,cx
   dw TOK_OR,0xc10b              ; or ax,cx
   dw TOK_XOR,0xc133             ; xor ax,cx

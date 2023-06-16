@@ -104,8 +104,7 @@ compile_stmts_tok_next2:
 compile_stmts_tok_next:
   call tok_next
 compile_stmts:
-  mov ax,bx
-  cmp ax,TOK_BLK_END            ; if we reach '}' then return
+  cmp bx,TOK_BLK_END            ; if we reach '}' then return
   je return
 
   test dh,dh                    ; if dh is 0, it's not a call

@@ -115,7 +115,8 @@ compile_stmts:
 
   mov ax,[bx]                   ; load function offset from symbol-table
   sub ax,di                     ; compute relative to this location: "dest - cur - 2"
-  sub ax,2
+  dec ax
+  dec ax
   stosw                         ;  emit target
 
   jmp compile_stmts_tok_next2   ; loop to compile next statement
@@ -149,7 +150,8 @@ _patch_back:
   stosb
   pop ax                        ; restore loop start location
   sub ax,di                     ; compute relative to this location: "dest - cur - 2"
-  sub ax,2
+  dec ax
+  dec ax
   stosw                         ; emit target
   ;; [fall-through]
 _patch_fwd:

@@ -312,7 +312,7 @@ emit_var:
   ;; [fall-through]
 
 emit_tok:
-  mov ax,bx
+  xchg ax,bx
   stosw                         ; emit token value
   jmp tok_next                  ; [tail-call]
 
@@ -352,7 +352,7 @@ _nextch:
   jmp _nextch                   ; [loop]
 
 _done:
-  mov ax,cx
+  xchg ax,cx
   cmp ax,0x2f2f                 ; check for single-line comment "//"
   je _comment_double_slash
   cmp ax,0x2f2a                 ; check for multi-line comment "/*"

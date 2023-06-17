@@ -248,6 +248,11 @@ _found:
   stosw                         ; emit
 
   pop bx                        ; restore 16-bit of machine-code
+  cmp bx,0xf1f7                 ; detect the special case for division opcode
+  jne check_cmp_op
+  mov ax, 0xd231                ; code for "xor dx,dx"
+  stosw
+check_cmp_op:
   cmp bh,0xc0                   ; detect the special case for comparison ops
   jne emit_op
 emit_cmp_op:
@@ -260,7 +265,7 @@ emit_cmp_op:
   ;; [fall-through]
 
 emit_op:
-  mov ax,bx
+  xchg ax,bx
   stosw                         ; emit machine code for op
   pop ds
   ret

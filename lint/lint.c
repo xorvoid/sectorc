@@ -47,6 +47,7 @@ typedef int64_t  i64;
   _( TOK_SUB,         "-",           65533      )\
   _( TOK_ADD,         "+",           65531      )\
   _( TOK_MUL,         "*",           65530      )\
+  _( TOK_DIV,         "/",           65535      )\
   _( TOK_OR,          "|",           76         )\
   _( TOK_XOR,         "^",           46         )\
   _( TOK_SHL,         "<<",          132        )\
@@ -405,6 +406,7 @@ static bool tok_oper_is(void)
     tok_kw_is(TOK_ADD) ||
     tok_kw_is(TOK_SUB) ||
     tok_kw_is(TOK_MUL) ||
+    tok_kw_is(TOK_DIV) ||
     tok_kw_is(TOK_ADDR) ||  // "AND" in this context
     tok_kw_is(TOK_OR) ||
     tok_kw_is(TOK_XOR) ||

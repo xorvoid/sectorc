@@ -239,10 +239,8 @@ void dump_code_segment_and_shutdown()
   i = 0;
   while( i < 8192 ){  /* Just assuming 8K is enough.. might not be true */
 
-    // (put "i" in ax); mov si,ax; mov ax,cs:[si]; mov [&a],ax
-    i = i; asm 137; asm 198; asm 46; asm 139; asm 4; asm 137; asm 133; asm 98; asm 0;
-
-    print_ch = a;
+    // (put "i" in ax); mov si,ax; mov ax,cs:[si]; mov [&print_ch],ax
+    i = i; asm 137; asm 198; asm 46; asm 139; asm 4; asm 163; asm 100; asm 132;
     print_char();
     i = i + 1;
   }

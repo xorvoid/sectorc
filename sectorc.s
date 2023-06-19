@@ -24,6 +24,7 @@
 %define TOK_SUB         65533
 %define TOK_ADD         65531
 %define TOK_MUL         65530
+%define TOK_DIV         65535
 %define TOK_AND         65526
 %define TOK_OR          76
 %define TOK_XOR         46
@@ -103,8 +104,7 @@ compile_stmts_tok_next2:
 compile_stmts_tok_next:
   call tok_next
 compile_stmts:
-  mov ax,bx
-  cmp ax,TOK_BLK_END            ; if we reach '}' then return
+  cmp bx,TOK_BLK_END            ; if we reach '}' then return
   je return
 
   test dh,dh                    ; if dh is 0, it's not a call
@@ -114,7 +114,8 @@ compile_stmts:
 
   mov ax,[bx]                   ; load function offset from symbol-table
   sub ax,di                     ; compute relative to this location: "dest - cur - 2"
-  sub ax,2
+  dec ax
+  dec ax
   stosw                         ;  emit target
 
   jmp compile_stmts_tok_next2   ; loop to compile next statement
@@ -148,7 +149,8 @@ _patch_back:
   stosb
   pop ax                        ; restore loop start location
   sub ax,di                     ; compute relative to this location: "dest - cur - 2"
-  sub ax,2
+  dec ax
+  dec ax
   stosw                         ; emit target
   ;; [fall-through]
 _patch_fwd:
@@ -246,6 +248,11 @@ _found:
   stosw                         ; emit
 
   pop bx                        ; restore 16-bit of machine-code
+  cmp bx,0xf1f7                 ; detect the special case for division opcode
+  jne check_cmp_op
+  mov ax, 0xd231                ; code for "xor dx,dx"
+  stosw
+check_cmp_op:
   cmp bh,0xc0                   ; detect the special case for comparison ops
   jne emit_op
 emit_cmp_op:
@@ -258,7 +265,7 @@ emit_cmp_op:
   ;; [fall-through]
 
 emit_op:
-  mov ax,bx
+  xchg ax,bx
   stosw                         ; emit machine code for op
   pop ds
   ret
@@ -305,7 +312,7 @@ emit_var:
   ;; [fall-through]
 
 emit_tok:
-  mov ax,bx
+  xchg ax,bx
   stosw                         ; emit token value
   jmp tok_next                  ; [tail-call]
 
@@ -345,7 +352,7 @@ _nextch:
   jmp _nextch                   ; [loop]
 
 _done:
-  mov ax,cx
+  xchg ax,cx
   cmp ax,0x2f2f                 ; check for single-line comment "//"
   je _comment_double_slash
   cmp ax,0x2f2a                 ; check for multi-line comment "/*"
@@ -403,6 +410,7 @@ binary_oper_tbl:
   dw TOK_ADD,0xc103             ; add ax,cx
   dw TOK_SUB,0xc12b             ; sub ax,cx
   dw TOK_MUL,0xe1f7             ; mul ax,cx
+  dw TOK_DIV,0xf1f7             ; div ax,cx
   dw TOK_AND,0xc123             ; and ax,cx
   dw TOK_OR,0xc10b              ; or ax,cx
   dw TOK_XOR,0xc133             ; xor ax,cx

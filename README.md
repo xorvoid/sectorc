@@ -127,7 +127,7 @@ expr        = unary (op unary)?
 unary       = deref identifier
             | "&" identifier
             | "(" expr ")"
-            | indentifier
+            | identifier
             | integer
 op          = "+" | "-" | "&" | "|" | "^" | "<<" | ">>"
             | "==" | "!=" | "<" | ">" | "<=" | ">="

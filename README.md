@@ -147,7 +147,7 @@ In 2020, cesarblum wrote a Forth that fits in a bootsector: ([sectorforth](https
 
 In 2021, jart et. al. wrote a Lisp that fits in the bootsector: ([sectorlisp](https://github.com/jart/sectorlisp))
 
-Naturally, C always needs to come and crash (literally) every low-level systems party regaurdless of whether it was even invited.
+Naturally, C always needs to come and crash (literally) every low-level systems party regardless of whether it was even invited.
 
 ## Running
 

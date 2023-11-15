@@ -102,7 +102,7 @@ void main()
 
 ## Provided Example Code
 
-A few examples are provided that leverage the unique hardware aspects of the x86-16 IBM PC:
+A few [examples](/examples) are provided that leverage the unique hardware aspects of the x86-16 IBM PC:
 - `examples/hello.c:` Print a text greeting on the screen writing to memory at 0xB8000
 - `examples/sinwave.c:` Draw a moving sine wave animation with VGA Mode 0x13 using an appropriately bad approximation of sin(x)
 - `examples/twinkle.c:` Play “Twinkle Twinkle Little Star” through the PC Speaker (Warning: LOUD)
@@ -127,7 +127,7 @@ expr        = unary (op unary)?
 unary       = deref identifier
             | "&" identifier
             | "(" expr ")"
-            | indentifier
+            | identifier
             | integer
 op          = "+" | "-" | "&" | "|" | "^" | "<<" | ">>"
             | "==" | "!=" | "<" | ">" | "<=" | ">="
@@ -135,7 +135,7 @@ op          = "+" | "-" | "&" | "|" | "^" | "<<" | ">>"
 
 In addition, both `// comment` and `/* multi-line comment */` styles are supported.
 
-(NOTE: This grammar is 704 bytes in ascii, 38% larger than it's implementation!)
+(NOTE: This grammar is 703 bytes in ascii, 38% larger than its implementation!)
 
 ## How?
 

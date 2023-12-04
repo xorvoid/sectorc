@@ -109,7 +109,7 @@ A few examples are provided that leverage the unique hardware aspects of the x86
 
 ## Grammar
   
-The following grammar is accepted and compiled by sectorc:
+The following grammar is accepted and compiled by SectorC:
 
 ```
 program     = (var_decl | func_decl)+
@@ -135,7 +135,7 @@ op          = "+" | "-" | "&" | "|" | "^" | "<<" | ">>"
 
 In addition, both `// comment` and `/* multi-line comment */` styles are supported.
 
-(NOTE: This grammar is 704 bytes in ascii, 38% larger than it's implementation!)
+(NOTE: This grammar is 704 bytes in ASCII, 38% larger than it's implementation!)
 
 ## How?
 
@@ -147,7 +147,7 @@ In 2020, cesarblum wrote a Forth that fits in a bootsector: ([sectorforth](https
 
 In 2021, jart et. al. wrote a Lisp that fits in the bootsector: ([sectorlisp](https://github.com/jart/sectorlisp))
 
-Naturally, C always needs to come and crash (literally) every low-level systems party regaurdless of whether it was even invited.
+Naturally, C always needs to come and crash (literally) every low-level systems party, regardless of whether it was even invited.
 
 ## Running
 

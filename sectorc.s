@@ -180,7 +180,7 @@ return:                         ; this label gives us a way to do conditional re
 compile_assign:
   cmp ax,TOK_DEREF              ; check for "*(int*)"
   jne _not_deref_store
-  call tok_next                 ; consome "*(int*)"
+  call tok_next                 ; consume "*(int*)"
   call save_var_and_compile_expr ; compile rhs first
   ;; [fall-through]
 

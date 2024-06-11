@@ -424,7 +424,7 @@ static void parse_expr(void);
 // unary = deref identifier
 //       | "&" identifier
 //       | "(" expr ")"
-//       | indentifier
+//       | identifier
 //       | integer
 static void parse_unary(void)
 {

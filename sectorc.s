@@ -62,6 +62,12 @@ entry:
   xor di,di                     ; codegen index, zero'd
   ;; [fall-through]
 
+  db 0x81                       ; mask following call
+  ;; [fall-through]
+_is_int:
+  call tok_next2                ; consume "int" and <ident>
+  ;; [fall-through]
+
   ;; main loop for parsing all decls
 compile:
   ;; advance to either "int" or "void"
@@ -69,9 +75,7 @@ compile:
 
   ;; if "int" then skip a variable
   cmp ax,TOK_INT
-  jne compile_function
-  call tok_next2                ; consume "int" and <ident>
-  jmp compile
+  je _is_int
 
 compile_function:               ; parse and compile a function decl
   call tok_next                 ; consume "void"
@@ -98,26 +102,35 @@ execute:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; compile statements (optionally advancing tokens beforehand)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-compile_stmts_tok_next2:
-  call tok_next
-compile_stmts_tok_next:
-  call tok_next
-compile_stmts:
-  mov ax,bx
-  cmp ax,TOK_BLK_END            ; if we reach '}' then return
-  je return
-
-  test dh,dh                    ; if dh is 0, it's not a call
-  je _not_call
+_is_call:
+  xchg bx,ax
   mov al,0xe8                   ; emit "call" instruction
   stosb
 
   mov ax,[bx]                   ; load function offset from symbol-table
   sub ax,di                     ; compute relative to this location: "dest - cur - 2"
-  sub ax,2
+  dec ax
+  dec ax
   stosw                         ;  emit target
+  ;; [fall-through]             ; loop to compile next statement
 
-  jmp compile_stmts_tok_next2   ; loop to compile next statement
+compile_stmts_tok_next2:
+  call tok_next
+compile_stmts_tok_next:
+  call tok_next
+  db 0x81                       ; mask following call
+  ;; [fall-through]
+_not_while:
+  call compile_assign           ; handle an assignment statement
+  ;; [fall-through]             ; loop to compile next statement
+
+compile_stmts:
+  xchg bx,ax
+  cmp ax,TOK_BLK_END            ; if we reach '}' then return
+  je return
+
+  test dh,dh                    ; if dh is 0, it's not a call
+  jne _is_call
 
 _not_call:
   cmp ax,TOK_ASM                ; check for "asm"
@@ -128,29 +141,29 @@ _not_call:
 
 _not_asm:
   cmp ax,TOK_IF_BEGIN           ; check for "if"
-  jne _not_if
-  call _control_flow_block      ; compile control-flow block
-  jmp _patch_fwd                ; patch up forward jump of if-stmt
+  je _is_if
 
 _not_if:
   cmp ax,TOK_WHILE_BEGIN        ; check for "while"
   jne _not_while
   push di                       ; save loop start location
   call _control_flow_block      ; compile control-flow block
-  jmp _patch_back               ; patch up backward and forward jumps of while-stmt
-
-_not_while:
-  call compile_assign           ; handle an assignment statement
-  jmp compile_stmts             ; loop to compile next statement
+  ;; [fall-through]             ; patch up backward and forward jumps of while-stmt
 
 _patch_back:
   mov al,0xe9                   ; emit "jmp" instruction (backwards)
   stosb
   pop ax                        ; restore loop start location
   sub ax,di                     ; compute relative to this location: "dest - cur - 2"
-  sub ax,2
+  dec ax
+  dec ax
   stosw                         ; emit target
   ;; [fall-through]
+  db 0x81                       ; mask following call
+_is_if:
+  call _control_flow_block      ; compile control-flow block
+  ;; [fall-through]             ; patch up forward jump of if-stmt
+
 _patch_fwd:
   mov ax,di                     ; compute relative fwd jump to this location: "dest - src"
   sub ax,si
@@ -185,8 +198,6 @@ compile_assign:
   ;; [fall-through]
 
 compile_store_deref:
-  mov bx,bp                     ; restore dest var token
-  mov ax,0x0489                 ; code for "mov [si],ax"
   ;; [fall-through]
 
 emit_common_ptr_op:
@@ -202,12 +213,11 @@ _not_deref_store:
   ;; [fall-through]
 
 compile_store:
-  mov bx,bp                     ; restore dest var token
-  mov ax,0x0689                 ; code for "mov [imm],ax"
+  mov ah,0x06                   ; code for "mov [imm],ax"
   jmp emit_var                  ; [tail-call]
 
 save_var_and_compile_expr:
-  mov bp,bx                     ; save dest to bp
+  xchg bp,ax                    ; save dest to bp
   call tok_next                 ; consume dest
   ;; [fall-through]             ; fall-through will consume "=" before compiling expr
 
@@ -219,24 +229,19 @@ compile_expr_tok_next:
 compile_expr:
   call compile_unary            ; compile left-hand side
 
-  push ds                       ; need to swap out 'ds' to scan the table with lodsw
-  push cs
-  pop ds
-
-  mov si,binary_oper_tbl - 2    ; load ptr to operator table (biased backwards)
+  push ds
+  push cs                       ; cannot use cs override!
+  pop ds                        ; because ';' here must be retained separately
+  mov cl,(binary_oper_tbl_e-binary_oper_tbl)/4
+  mov si,binary_oper_tbl        ; load ptr to operator table (biased backwards)
 _check_next:
-  lodsw                         ; discard 16-bit of machine-code
   lodsw                         ; load 16-bit token value
   cmp ax,bx                     ; matches token?
-  je _found
-  test ax,ax                    ; end of table?
-  jne _check_next
-
-  pop ds
-  ret                           ; all-done, not found
+  lodsw                         ; load 16-bit of machine-code
+  loopne _check_next            ; lodsw does not affect flags
+  jne _not_found
 
 _found:
-  lodsw                         ; load 16-bit of machine-code
   push ax                       ; save it to the stack
   mov al,0x50                   ; code for "push ax"
   stosb                         ; emit
@@ -258,9 +263,13 @@ emit_cmp_op:
   ;; [fall-through]
 
 emit_op:
-  mov ax,bx
+  xchg bx,ax
   stosw                         ; emit machine code for op
+
+_not_found:
   pop ds
+  mov bx,bp                     ; restore dest var token
+  mov ax,0x0489                 ; code for "mov [si],ax"
   ret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -289,14 +298,15 @@ _not_paren:
 
 _not_addr:
   test dl,dl                    ; check for tok_is_num
-  je _not_int
+  mov ax,0x068b                 ; code for "mov ax,[imm]"
+  je _not_int                   ; mov does not affect flags
   mov al,0xb8                   ; code for "mov ax,imm"
   stosb                         ; emit
-  jmp emit_tok                  ; [tail-call] to emit imm
-
+  db 0xf6                       ; mask following stosw and add bx,bx
+                                ; [tail-call] to emit imm
+  ;; [fall-through]
 _not_int:
   ;; compile var
-  mov ax,0x068b                 ; code for "mov ax,[imm]"
   ;; [fall-through]
 
 emit_var:
@@ -305,10 +315,10 @@ emit_var:
   ;; [fall-through]
 
 emit_tok:
-  mov ax,bx
+  xchg bx,ax
   stosw                         ; emit token value
-  jmp tok_next                  ; [tail-call]
-
+  db 0x81                       ; mask following call [tail-call]
+  ;; [fall-through]
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; get next token, setting the following:
 ;;;   ax: token
@@ -331,10 +341,7 @@ tok_next:
   setle dl                      ; tok_is_num = (al <= '9')
 
 _nextch:
-  cmp al,32
-  jle _done                     ; if char is space then break
-
-  shl cx,8
+  mov ch,cl
   mov cl,al                     ; shift this char into cx
 
   imul bx,10
@@ -342,10 +349,11 @@ _nextch:
   add bx,ax                     ; atoi computation: bx = 10 * bx + (ax - '0')
 
   call getch
-  jmp _nextch                   ; [loop]
+  cmp al,32
+  jg _nextch                    ; loop if char is not space
 
 _done:
-  mov ax,cx
+  xchg cx,ax
   cmp ax,0x2f2f                 ; check for single-line comment "//"
   je _comment_double_slash
   cmp ax,0x2f2a                 ; check for multi-line comment "/*"
@@ -381,7 +389,7 @@ getch:
 
 getch_tryagain:
   mov ax,0x0200
-  xor dx,dx
+  cwd
   int 0x14                      ; get a char from serial (bios function)
 
   and ah,0x80                   ; check for failure and clear ah as a side-effect
@@ -389,8 +397,7 @@ getch_tryagain:
 
   cmp al,59                     ; check for ';'
   jne getch_done                ; if not ';' return it
-  mov [si],ax                   ; save the ';'
-  xor ax,ax                     ; return 0 instead, treated as whitespcae
+  xchg [si],ax                  ; save the ';', return 0 instead, treated as whitespcae
 
 getch_done:
   pop dx
@@ -414,7 +421,7 @@ binary_oper_tbl:
   dw TOK_GT,0xc09f              ; setg al
   dw TOK_LE,0xc09e              ; setle al
   dw TOK_GE,0xc09d              ; setge al
-  dw 0                          ; [sentinel]
+binary_oper_tbl_e:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; boot signature

@@ -23,7 +23,7 @@ All of these features make it quite capable.
 
 For example, the following program animates a moving sine-wave:
 
-```
+```c
 int y;
 int x;
 int x_0;

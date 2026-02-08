@@ -129,6 +129,8 @@ unary       = deref identifier
             | "(" expr ")"
             | identifier
             | integer
+            | char_literal
+char_literal = "'" <character> "'"
 op          = "+" | "-" | "&" | "|" | "^" | "<<" | ">>"
             | "==" | "!=" | "<" | ">" | "<=" | ">="
 ```

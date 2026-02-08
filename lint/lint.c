@@ -273,6 +273,21 @@ static void tok_next(void)
       continue;
     }
 
+    // Handle character literal
+    if (c == '\'') {
+      tok_char_next();
+      c = tok_char_get();
+      tok->type = TOK_TYPE_NUM;
+      tok->text = input_ptr - 1;
+      tok->len = 3;
+      tok->val = c;
+      tok_char_next();
+      c = tok_char_get();
+      if (c != '\'') error("expected closing quote for character literal");
+      tok_char_next();
+      return;
+    }
+
     tok->type = ('0' <= c && c <= '9') ? TOK_TYPE_NUM : TOK_TYPE_SYM;
     tok->text = input_ptr;
     tok->len = 1;

@@ -324,6 +324,9 @@ tok_next:
   cmp al,32                     ; skip spaces (anything <= ' ' is considered space)
   jle tok_next
 
+  cmp al,39                     ; check for single quote (character literal)
+  je _char_literal
+
   xor bx,bx                     ; zero token reg
   xor cx,cx                     ; zero last-two chars reg
 
@@ -354,6 +357,15 @@ _done:
   sete dh
 
   mov ax,bx                     ; return token in ax also
+  ret
+
+_char_literal:
+  call getch                    ; get the character inside quotes
+  xor ah,ah                     ; zero high byte of ax
+  mov bx,ax                     ; bx = character value
+  call getch                    ; consume closing quote
+  mov dl,1                      ; tok_is_num = true (treat as number)
+  mov ax,bx                     ; return value in ax
   ret
 
 _comment_double_slash:

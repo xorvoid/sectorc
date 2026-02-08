@@ -8,7 +8,7 @@ if [ "$#" -lt 1 ]; then
     exit 1
 fi
 
-# Handle running on Linux that usually uses PulseAudio and doesn't have coreaudio.
+# Handle running on Linux that usually uses ALSA and doesn't have coreaudio.
 is_linux=$(uname | grep Linux)
 if [[ -z "$is_linux" ]]; then
   audiodev=coreaudio

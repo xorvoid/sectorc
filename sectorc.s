@@ -35,6 +35,7 @@
 %define TOK_GT          14
 %define TOK_LE          133
 %define TOK_GE          153
+%define TOK_END_COMMENT 65475 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Common register uses
@@ -321,24 +322,24 @@ tok_next2:
   ;; [fall-through]
 tok_next:
   call getch
-  cmp al,32                     ; skip spaces (anything <= ' ' is considered space)
+  cmp al,' '                    ; skip spaces (anything <= ' ' is considered space)
   jle tok_next
 
   xor bx,bx                     ; zero token reg
   xor cx,cx                     ; zero last-two chars reg
 
-  cmp al,57
+  cmp al,'9'
   setle dl                      ; tok_is_num = (al <= '9')
 
 _nextch:
-  cmp al,32
+  cmp al,' '
   jle _done                     ; if char is space then break
 
   shl cx,8
   mov cl,al                     ; shift this char into cx
 
   imul bx,10
-  sub ax,48
+  sub ax,'0'
   add bx,ax                     ; atoi computation: bx = 10 * bx + (ax - '0')
 
   call getch
@@ -358,13 +359,13 @@ _done:
 
 _comment_double_slash:
   call getch                    ; get next char
-  cmp al,10                     ; check for newline '\n'
+  cmp al,`\n`                   ; check for newline '\n'
   jne _comment_double_slash     ; [loop]
   jmp tok_next                  ; [tail-call]
 
 _comment_multi_line:
   call tok_next                 ; get next token
-  cmp ax,65475                  ; check for token "*/"
+  cmp ax,TOK_END_COMMENT        ; check for token "*/"
   jne _comment_multi_line       ; [loop]
   jmp tok_next                  ; [tail-call]
 
@@ -376,7 +377,7 @@ getch:
   xor si,si                     ; use ds:0 as a semi-colon buffer, encodes smaller via si
   mov ax,[si]                   ; load the semi-colon buffer
   xor [si],ax                   ; zero the buffer
-  cmp al,59                     ; check for ';'
+  cmp al,';'                    ; check for ';'
   je getch_done                 ; if ';' return it
 
 getch_tryagain:
@@ -387,7 +388,7 @@ getch_tryagain:
   and ah,0x80                   ; check for failure and clear ah as a side-effect
   jne getch_tryagain            ; failed, try again later
 
-  cmp al,59                     ; check for ';'
+  cmp al,';'                    ; check for ';'
   jne getch_done                ; if not ';' return it
   mov [si],ax                   ; save the ';'
   xor ax,ax                     ; return 0 instead, treated as whitespcae

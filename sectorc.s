@@ -24,6 +24,7 @@
 %define TOK_SUB         65533
 %define TOK_ADD         65531
 %define TOK_MUL         65530
+%define TOK_DIV         65535
 %define TOK_AND         65526
 %define TOK_OR          76
 %define TOK_XOR         46
@@ -247,7 +248,18 @@ _found:
 
   pop bx                        ; restore 16-bit of machine-code
   cmp bh,0xc0                   ; detect the special case for comparison ops
+  je emit_cmp_op
+  cmp bh,0xd0                   ; detect division op
   jne emit_op
+
+  ; division operator inline
+  mov ax,0xd231                 ; code for "xor dx,dx"
+  stosw                         ; emit
+  mov ax,0xf1f7                 ; code for "div cx"
+  stosw                         ; emit
+  pop ds
+  ret
+
 emit_cmp_op:
   mov ax,0xc839                 ; code for "cmp ax,cx"
   stosw                         ; emit
@@ -258,7 +270,7 @@ emit_cmp_op:
   ;; [fall-through]
 
 emit_op:
-  mov ax,bx
+  xchg ax,bx                    ; 1 byte instead of mov ax,bx (2 bytes)
   stosw                         ; emit machine code for op
   pop ds
   ret
@@ -402,7 +414,8 @@ getch_done:
 binary_oper_tbl:
   dw TOK_ADD,0xc103             ; add ax,cx
   dw TOK_SUB,0xc12b             ; sub ax,cx
-  dw TOK_MUL,0xe1f7             ; mul ax,cx
+  dw TOK_MUL,0xe1f7             ; mul cx
+  dw TOK_DIV,0xd0f1             ; div cx (marker: 0xd0, low byte is F1 for "div cx")
   dw TOK_AND,0xc123             ; and ax,cx
   dw TOK_OR,0xc10b              ; or ax,cx
   dw TOK_XOR,0xc133             ; xor ax,cx
